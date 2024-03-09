@@ -1,0 +1,132 @@
+[include]
+    path = .priv/gitconfig
+
+[user]
+	email = e.e.f.prudhomme@gmail.com
+	name = Etienne Prud’homme
+	signingkey = 21338F9A68EA75AD531D11E11BF38BFA3390A95A
+
+[core]
+	editor = emacsclient
+	pager  = diff-so-fancy | less --tabs=4 -RFX
+
+[init]
+	defaultBranch = main
+
+[commit]
+    gpgsign = True
+
+[status]
+	submoduleSummary = true
+
+[diff]
+	submodule = log
+
+[grep]
+	extendRegexp = true
+
+[interactive]
+	diffFilter = diff-so-fancy --patch
+
+[alias]
+	s = status
+	log-graph = log --all --graph --decorate
+	log-refs = log --all --graph --decorate --oneline --simplify-by-decoration --no-merges
+	log-local = log --oneline origin..HEAD
+	log-fetched = log --oneline HEAD..origin
+
+	lg = log --pretty=tformat:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ <%cn>" --date=short --graph --decorate
+	# log all branch
+	lol = "lg --all"
+	# see last 10,20 commits
+	lol1 = "!git lol -1"
+	lol10 = "!git lol -10"
+	lol20 = "!git lol -20"
+	lol40 = "!git lol -40"
+
+	lstat = log --oneline --decorate --stat
+
+	# Log with patch generation
+	lp = log --patch
+
+	# Show the log for a given author
+	log-author = log --author
+
+	# Show the log for my own user email
+	log-me = !git log --author $(git config user.email)
+
+	# Show files and how many commits they are part of
+	churn = !git log --all -M -C --name-only --format='format:' "$@" | sort | grep -v '^$' | uniq -c | sort -n
+
+	# Given an author, try to figure out full name and email
+	whois = "!sh -c 'git log -i -1 -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
+	# Given an author, list all authors matching
+	whois-ls = "!sh -c 'git log -i --pretty=\"format:%an <%ae>\" --author=\"$1\" | sort | uniq -u' -"
+
+	# Remove from the staging area and not the work
+	rm-cached = rm --cached
+
+	# List files that git has ignored
+	ls-ignored = ls-files --others --i --exclude-standardls-files --others --i --exclude-standard
+	# Show Git tracked files
+	ls = ls-files
+
+	# Find all objects that aren't referenced by any other object (orphans)
+	orphans = fsck --full
+	# https://stackoverflow.com/questions/3765234/listing-and-deleting-git-commits-that-are-under-no-branch-dangling
+	# Clean orphans now (otherwise gc will have to wait 2 week)
+	orphans-rm = !git reflog expire --expire-unreachable=now --all && git gc --prune=now
+
+	# Prune everything that is unreachable now.
+	# This is useful for removing unreachable objects from all places.
+	pruner = !git prune --expire=now && git reflog expire --expire-unreachable=now --rewrite --all
+	# Repack a repo the way Linus recommends.
+	repacker = !git repack -a -d -f --depth=300 --window=300 --window-memory=1g
+	# Do everything we can to optimize the repository
+	optimize = !git pruner && git repacker && git prune-packed
+
+	# Checkout local copies of pull requests from remotes (on GitHub)
+	pr  = "!f() { git fetch -fu ${2:-$(git remote |grep ^upstream || echo origin)} refs/pull/$1/head:pr/$1 && git checkout pr/$1; }; f"
+	# For bitbucket/stash remotes
+	spr = "!f() { git fetch -fu \"${2:-$(git remote |grep ^upstream || echo origin)}\" \"refs/pull-requests/$1/from:pr/$1\" && git checkout \"pr/$1\"; }; f"
+	#
+	pr-clean = "!git for-each-ref refs/heads/pr/* --format='%(refname)' | while read ref ; do branch=${ref#refs/heads/} ; git branch -D $branch ; done"
+	st = status
+
+[color]
+    ui = auto
+
+[color "status"]
+	branch    = cyan
+	added     = bold green
+	changed   = bold cyan
+	untracked = bold yellow
+	deleted   = bold red
+	nobranch  = bold ul blink "#f99157"
+
+[color "branch"]
+	current  = yellow reverse
+	local    = yellow
+	remote   = green
+	upstream = cyan
+
+[color "diff-highlight"]
+	oldNormal    = red bold
+    oldHighlight = red bold 52
+    newNormal    = green bold
+    newHighlight = green bold 22
+
+[color "diff"]
+    meta       = 11
+    frag       = magenta bold
+	func       = 146 bold
+    commit     = yellow bold
+    old        = red bold
+    new        = green bold
+    whitespace = red reverse
+
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
