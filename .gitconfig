@@ -71,6 +71,9 @@
 	# Show Git tracked files
 	ls = ls-files
 
+    # Backup untracked files
+	backup-untracked = "!git ls-files --others --exclude-standard -z | xargs -0 tar rvf untracked-backup.tar"
+
 	# Find all objects that aren't referenced by any other object (orphans)
 	orphans = fsck --full
 	# https://stackoverflow.com/questions/3765234/listing-and-deleting-git-commits-that-are-under-no-branch-dangling
