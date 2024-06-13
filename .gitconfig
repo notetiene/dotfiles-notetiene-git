@@ -96,6 +96,9 @@
 	pr-clean = "!git for-each-ref refs/heads/pr/* --format='%(refname)' | while read ref ; do branch=${ref#refs/heads/} ; git branch -D $branch ; done"
 	st = status
 
+	# git rebase-mv OLD NEW REF
+	rebase-mv = "!f() { dir=$(dirname \"$2\"); git filter-branch -f --tree-filter \"mkdir -p \\\"$dir\\\"; mv \\\"$1\\\" \\\"$2\\\"\" \"$3\"; }; f"
+
 [color]
     ui = auto
 
